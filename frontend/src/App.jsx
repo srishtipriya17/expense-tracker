@@ -1,5 +1,15 @@
 
+
 import { useEffect, useState } from "react";
+import "./App.css";
+
+function getTodayDate() {
+  const today = new Date();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${today.getFullYear()}-${month}-${day}`;
+}
 
 function App() {
   const [transactions, setTransactions] = useState([]);
@@ -7,9 +17,7 @@ function App() {
   const [amount, setAmount] = useState("");
   const [type, setType] = useState("expense");
   const [category, setCategory] = useState("Food");
-  const [date, setDate] = useState(
-    new Date().toLocaleDateString("en-CA")
-  );
+  const [date, setDate] = useState(getTodayDate);
   const [message, setMessage] = useState("");
 
   const API_URL = "http://localhost:5000/api/transactions";

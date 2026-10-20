@@ -29,6 +29,33 @@ let transactions = [
     date: "2026-10-17",
   },
 ];
+let nextTransactionId =
+  Math.max(...transactions.map((transaction) => transaction.id)) + 1;
+
+function isValidDate(date) {
+  if (typeof date !== "string" || !/^\d{4}-\d{2}-\d{2}$/.test(date)) {
+    return false;
+  }
+
+  const [year, month, day] = date.split("-").map(Number);
+  const isLeapYear = year % 4 === 0 && (year % 100 !== 0 || year % 400 === 0);
+  const daysInMonth = [
+    31,
+    isLeapYear ? 29 : 28,
+    31,
+    30,
+    31,
+    30,
+    31,
+    31,
+    30,
+    31,
+    30,
+    31,
+  ];
+
+  return month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth[month - 1];
+}
 
 // Test route
 app.get("/", (req, res) => {
@@ -42,6 +69,12 @@ app.get("/api/transactions", (req, res) => {
 
 // POST: create a transaction
 app.post("/api/transactions", (req, res) => {
+  if (!req.body || typeof req.body !== "object" || Array.isArray(req.body)) {
+    return res.status(400).json({
+      message: "Please provide valid transaction details.",
+    });
+  }
+
   const { title, amount, type, category, date } = req.body;
 
   if (
@@ -52,9 +85,7 @@ app.post("/api/transactions", (req, res) => {
     !["income", "expense"].includes(type) ||
     typeof category !== "string" ||
     !category.trim() ||
-    typeof date !== "string" ||
-    !/^\d{4}-\d{2}-\d{2}$/.test(date) ||
-    !Number.isFinite(Date.parse(date))
+    !isValidDate(date)
   ) {
     return res.status(400).json({
       message: "Please provide valid transaction details.",
@@ -62,7 +93,7 @@ app.post("/api/transactions", (req, res) => {
   }
 
   const newTransaction = {
-    id: Date.now(),
+    id: nextTransactionId++,
     title: title.trim(),
     amount,
     type,
